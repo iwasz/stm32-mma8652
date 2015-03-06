@@ -1,0 +1,22 @@
+===What it is===
+A simple template for my peronal (and anyone who wishes) use. Fits STM32F4, uses CMake as a build system.
+
+===Required stuff===
+* Cross-compiler. Make one by yourself using my instructions : http://www.iwasz.pl/electronics/toolchain-for-cortex-m4/
+* CMake (the more recent, the better).
+* STM32F4 Cube. It used to be named StdPeriph, and now they rebranded. 
+
+===How to run===
+Clone it, cd to the build directory and then:
+
+<source lang="bash">
+cd bouild
+cmake -DCMAKE_BUILD_TYPE=Debug .
+make
+make upload
+
+#OR
+./configure.sh
+make
+make upload
+</source>

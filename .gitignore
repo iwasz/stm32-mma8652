@@ -1,0 +1,9 @@
+.cproject
+.project
+build/CMakeCache.txt
+build/CMakeFiles/
+build/Makefile
+build/cmake_install.cmake
+build/stm32-template.bin
+build/stm32-template.elf
+build/stm32-template.hex
