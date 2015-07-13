@@ -37,29 +37,11 @@
  ******************************************************************************
  */
 
-/* Includes ------------------------------------------------------------------*/
-#include "stm32f4xx_it.h"
-#include <stm32f4xx_hal.h>
+#include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_conf.h"
 
-/** @addtogroup STM32F4xx_HAL_Examples
- * @{
- */
-
-/** @addtogroup Templates
- * @{
- */
-
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
-
-/******************************************************************************/
-/*            Cortex-M4 Processor Exceptions Handlers                         */
-/******************************************************************************/
+extern PCD_HandleTypeDef hpcd;
+extern TIM_HandleTypeDef TimHandle;
 
 /**
  * @brief  This function handles NMI exception.
@@ -163,20 +145,23 @@ void SysTick_Handler (void)
 /******************************************************************************/
 
 /**
- * @brief  This function handles PPP interrupt request.
+ * @brief  This function handles USB-On-The-Go FS global interrupt request.
  * @param  None
  * @retval None
  */
-/*void PPP_IRQHandler(void)
- {
- }*/
+void OTG_FS_IRQHandler(void)
+{
+        HAL_PCD_IRQHandler (&hpcd);
+}
+
+
 
 /**
- * @}
+ * @brief  This function handles TIM interrupt request.
+ * @param  None
+ * @retval None
  */
-
-/**
- * @}
- */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+void TIM3_IRQHandler (void)
+{
+        HAL_TIM_IRQHandler (&TimHandle);
+}

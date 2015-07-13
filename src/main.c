@@ -1,60 +1,16 @@
-/**
- ******************************************************************************
- * @file    Templates/Src/main.c
- * @author  MCD Application Team
- * @version V1.2.0
- * @date    26-December-2014
- * @brief   Main program body
- ******************************************************************************
- * @attention
- *
- * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- ******************************************************************************
- */
+#include <stm32f4xx_hal.h>
+#include <stdio.h>
+#include "usbd_core.h"
+#include "usbd_desc.h"
+#include "usbd_cdc.h"
+#include "usbd_cdc_interface.h"
+#include "config.h"
+#include "debugLed.h"
 
-#include "stm32f4xx_hal.h"
-#include <stm32f4_discovery.h>
+USBD_HandleTypeDef USBD_Device;
 
-/** @addtogroup STM32F4xx_HAL_Examples
- * @{
- */
-
-/** @addtogroup Templates
- * @{
- */
-
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config (void);
-static void Error_Handler (void);
-
-/* Private functions ---------------------------------------------------------*/
+void Error_Handler (void);
 
 /**
  * @brief  Main program
@@ -78,38 +34,31 @@ int main (void)
         /* Configure the System clock to 180 MHz */
         SystemClock_Config ();
 
-        BSP_LED_Init (LED3);
-        BSP_LED_Init (LED4);
-        BSP_LED_Init (LED5);
-        BSP_LED_Init (LED6);
+        /* Init Device Library */
+        USBD_Init (&USBD_Device, &VCP_Desc, 0);
+
+        /* Add Supported Class */
+        USBD_RegisterClass (&USBD_Device, USBD_CDC_CLASS);
+
+        /* Add CDC Interface Class */
+        USBD_CDC_RegisterInterface (&USBD_Device, &USBD_CDC_fops);
+
+        /* Start Device Process */
+        USBD_Start (&USBD_Device);
+
+        debugLedInit (D2);
+        debugLedInit (D3);
+        debugLedInit (D4);
+        debugLedInit (D5);
 
         /* Infinite loop */
         while (1) {
-                BSP_LED_Toggle(LED6);
-                HAL_Delay (500);
+                printf ("Hello world\n");
+                debugLedToggle (D2);
+                HAL_Delay (1000);
         }
 }
 
-/**
- * @brief  System Clock Configuration
- *         The system Clock is configured as follow :
- *            System Clock source            = PLL (HSE)
- *            SYSCLK(Hz)                     = 180000000
- *            HCLK(Hz)                       = 180000000
- *            AHB Prescaler                  = 1
- *            APB1 Prescaler                 = 4
- *            APB2 Prescaler                 = 2
- *            HSE Frequency(Hz)              = 8000000
- *            PLL_M                          = 8
- *            PLL_N                          = 360
- *            PLL_P                          = 2
- *            PLL_Q                          = 7
- *            VDD(V)                         = 3.3
- *            Main regulator output voltage  = Scale1 mode
- *            Flash Latency(WS)              = 5
- * @param  None
- * @retval None
- */
 static void SystemClock_Config (void)
 {
         RCC_ClkInitTypeDef RCC_ClkInitStruct;
@@ -162,7 +111,7 @@ static void SystemClock_Config (void)
  * @param  None
  * @retval None
  */
-static void Error_Handler (void)
+void Error_Handler (void)
 {
         /* User may add here some code to deal with this error */
         while (1) {

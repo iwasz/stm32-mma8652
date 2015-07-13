@@ -9,3 +9,4 @@ build/stm32-template.elf
 build/stm32-template.hex
 untitled.sublime-project
 untitled.sublime-workspace
+build/conf.sh.inc
