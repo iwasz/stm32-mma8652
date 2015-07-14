@@ -1,5 +1,11 @@
-===What it is===
-A simple template for my peronal (and anyone who wishes) use. Fits STM32F4, uses CMake as a build system.
+===Links===
+* http://cache.freescale.com/files/sensors/doc/data_sheet/MMA8652FC.pdf datasheet
+* http://cache.freescale.com/files/sensors/doc/data_sheet/AN4083.pdf application note
+* http://www.findchips.com/search/MMA8652 quite cheap if not the cheapest accel.
+
+===Test circuit===
+The IC has 10 pins @ 0.4mm pitch. I soldered this with regular chinese iron (chisel tip, 0.25mm solder with core and RF800 flux).
+[[File:test-circuit.jpg]] 
 
 ===Required stuff===
 * Cross-compiler. Make one by yourself using my instructions : http://www.iwasz.pl/electronics/toolchain-for-cortex-m4/
@@ -10,8 +16,8 @@ A simple template for my peronal (and anyone who wishes) use. Fits STM32F4, uses
 Clone it, cd to the build directory and then:
 
 <source lang="bash">
-cd bouild
-cmake -DCMAKE_BUILD_TYPE=Debug .
+cd build
+cmake ..
 make
 make upload
 
