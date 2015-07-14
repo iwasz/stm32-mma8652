@@ -6,11 +6,12 @@
 #include "usbd_cdc_interface.h"
 #include "config.h"
 #include "debugLed.h"
+#include "mma8652/mma8652.h"
 
 USBD_HandleTypeDef USBD_Device;
+I2C_HandleTypeDef i2cHandle;
 
 static void SystemClock_Config (void);
-void Error_Handler (void);
 
 /**
  * @brief  Main program
@@ -46,16 +47,57 @@ int main (void)
         /* Start Device Process */
         USBD_Start (&USBD_Device);
 
+/*---------------------------------------------------------------------------*/
+
+        i2cHandle.Instance = I2Cx;
+        i2cHandle.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+        i2cHandle.Init.ClockSpeed = 100000;
+        i2cHandle.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+        i2cHandle.Init.DutyCycle = I2C_DUTYCYCLE_2;
+        i2cHandle.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+        i2cHandle.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+        i2cHandle.Init.OwnAddress1 = 0x2d;
+        i2cHandle.Init.OwnAddress2 = 0xFE;
+
+        if (HAL_I2C_Init (&i2cHandle) != HAL_OK) {
+                Error_Handler ();
+        }
+
+        printf ("MMA8652 Init\n");
+        mma8652Init (&i2cHandle);
+
+/*---------------------------------------------------------------------------*/
+
+        uint8_t txBuffer[3];
+        uint8_t rxBuffer[6];
+
         debugLedInit (D2);
         debugLedInit (D3);
         debugLedInit (D4);
         debugLedInit (D5);
 
+
+
         /* Infinite loop */
         while (1) {
-                printf ("Hello world\n");
+//                printf ("Hello world\n");
                 debugLedToggle (D2);
                 HAL_Delay (1000);
+
+
+                /* Timeout is set to 10S */
+                while (HAL_I2C_Master_Receive (&i2cHandle, (uint8_t) MMA8652_I2C_ADDR, (uint8_t *) rxBuffer, 6, 1000) != HAL_OK) {
+                        if (HAL_I2C_GetError (&i2cHandle) != HAL_I2C_ERROR_AF) {
+                                Error_Handler ();
+                        }
+                }
+
+                int16_t x = rxBuffer[0] << 8 | rxBuffer[1];
+                int16_t y = rxBuffer[2] << 8 | rxBuffer[3];
+                int16_t z = rxBuffer[4] << 8 | rxBuffer[5];
+
+                printf ("%d %d %d\n", x, y, z);
+
         }
 }
 
@@ -93,14 +135,12 @@ static void SystemClock_Config (void)
 
         /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2
          clocks dividers */
-        RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK
-                        | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+        RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
         RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
         RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
         RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
         RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
-        if (HAL_RCC_ClockConfig (&RCC_ClkInitStruct, FLASH_LATENCY_5)
-                        != HAL_OK) {
+        if (HAL_RCC_ClockConfig (&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK) {
                 /* Initialization Error */
                 Error_Handler ();
         }

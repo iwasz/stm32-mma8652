@@ -10,3 +10,5 @@ build/stm32-template.hex
 untitled.sublime-project
 untitled.sublime-workspace
 build/conf.sh.inc
+build/stm32-mma8652.bin
+build/stm32-mma8652.elf
